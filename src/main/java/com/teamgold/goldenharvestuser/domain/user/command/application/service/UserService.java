@@ -1,0 +1,17 @@
+package com.teamgold.goldenharvestuser.domain.user.command.application.service;
+
+import com.teamgold.goldenharvestuser.domain.user.command.application.dto.request.PasswordChangeRequest;
+import com.teamgold.goldenharvestuser.domain.user.command.application.dto.request.UserProfileUpdateRequest;
+import com.teamgold.goldenharvestuser.domain.user.command.application.dto.request.UserUpdateRequest;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+
+public interface UserService {
+
+    void changePassword(String email, PasswordChangeRequest request);
+
+    void updateProfile(String email, UserProfileUpdateRequest userProfileUpdateRequest);
+
+    void requestBusinessUpdate(String email, UserUpdateRequest userUpdateRequest, MultipartFile file) throws IOException;
+}
