@@ -6,6 +6,7 @@ import com.teamgold.goldenharvestuser.domain.user.query.application.dto.reponse.
 import com.teamgold.goldenharvestuser.domain.user.query.application.service.AdminUserQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ public class AdminUserQueryController {
     private final AdminUserQueryService adminUserQueryService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserAdminResponse>>> getAllUsers() {
         System.out.println("[Backend] 전체 회원 조회 API 호출됨!"); // 로그 추가
         List<UserAdminResponse> result = adminUserQueryService.getAllUsersForAdmin();
@@ -27,6 +29,7 @@ public class AdminUserQueryController {
     }
 
     @GetMapping("/update-requests")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserUpdateApprovalResponse>>> getPendingUpdateRequests() {
         // AdminUserQueryService에서 처리
         return ResponseEntity.ok(ApiResponse.success(adminUserQueryService.getPendingUpdateRequests()));
