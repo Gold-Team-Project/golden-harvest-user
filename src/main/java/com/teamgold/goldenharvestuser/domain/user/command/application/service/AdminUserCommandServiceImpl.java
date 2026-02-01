@@ -2,8 +2,8 @@ package com.teamgold.goldenharvestuser.domain.user.command.application.service;
 
 import com.teamgold.goldenharvestuser.common.exception.BusinessException;
 import com.teamgold.goldenharvestuser.common.exception.ErrorCode;
-import com.teamgold.goldenharvestuser.domain.user.command.application.event.UserUpdateEventPublisher;
-import com.teamgold.goldenharvestuser.domain.user.command.application.event.dto.UserUpdatedEvent;
+import com.teamgold.goldenharvestuser.domain.user.command.application.event.UserStatusUpdateEventPublisher;
+import com.teamgold.goldenharvestuser.domain.user.command.application.event.dto.UserStatusUpdatedEvent;
 import com.teamgold.goldenharvestuser.domain.user.command.domain.*;
 import com.teamgold.goldenharvestuser.domain.user.command.infrastructure.repository.RoleRepository;
 import com.teamgold.goldenharvestuser.domain.user.command.infrastructure.repository.UserRepository;
@@ -23,7 +23,7 @@ public class AdminUserCommandServiceImpl implements AdminUserCommandService {
 
     private final UserRepository userRepository;
     private final UserUpdateApprovalRepository userUpdateApprovalRepository;
-	private final UserUpdateEventPublisher userUpdateEventPublisher;
+	private final UserStatusUpdateEventPublisher userUpdateEventPublisher;
     private final RoleRepository roleRepository;
 
     @Override
@@ -82,8 +82,8 @@ public class AdminUserCommandServiceImpl implements AdminUserCommandService {
         List<User> users = userRepository.findAll();
 
         for (User user : users) {
-            userUpdateEventPublisher.publishUpdatedUserDetails(
-                    UserUpdatedEvent.builder()
+            userUpdateEventPublisher.publishUserStatusUpdatedEvent(
+                    UserStatusUpdatedEvent.builder()
                             .phoneNumber(user.getPhoneNumber())
                             .postalCode(user.getPostalCode())
                             .addressLine1(user.getAddressLine1())

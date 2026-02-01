@@ -1,17 +1,17 @@
 package com.teamgold.goldenharvestuser.domain.user.command.application.event;
 
-import com.teamgold.goldenharvestuser.domain.user.command.application.event.dto.UserUpdatedEvent;
+import com.teamgold.goldenharvestuser.domain.user.command.application.event.dto.UserStatusUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class UserUpdateEventPublisher {
+public class UserStatusUpdateEventPublisher {
 
 	private final ApplicationEventPublisher publisher;
 
-	public void publishUpdatedUserDetails(UserUpdatedEvent event) {
+	public void publishUserStatusUpdatedEvent(UserStatusUpdatedEvent event) {
 		publisher.publishEvent(event);
 	}
 }
