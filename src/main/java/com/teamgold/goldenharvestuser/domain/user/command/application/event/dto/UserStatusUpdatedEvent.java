@@ -3,7 +3,7 @@ package com.teamgold.goldenharvestuser.domain.user.command.application.event.dto
 import lombok.Builder;
 
 @Builder
-public record UserUpdatedEvent(
+public record UserStatusUpdatedEvent(
     String email,
     String company,
     String businessNumber,
