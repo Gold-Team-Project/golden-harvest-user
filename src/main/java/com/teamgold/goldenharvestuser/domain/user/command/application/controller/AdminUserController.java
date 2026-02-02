@@ -6,6 +6,9 @@ import com.teamgold.goldenharvestuser.domain.user.command.application.service.Ad
 import com.teamgold.goldenharvestuser.domain.user.command.domain.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +20,7 @@ public class AdminUserController {
 
     // 신규 가입 승인
     @PatchMapping("/{email}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> approveUser(
             @PathVariable String email,
             @RequestBody UserApproveRequest request) {
@@ -25,6 +29,7 @@ public class AdminUserController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
     // 정보 수정 승인
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/update-requests/{requestId}/approve")
     public ResponseEntity<ApiResponse<Void>> approveProfileUpdate(@PathVariable Long requestId) {
         adminUserCommandService.approveProfileUpdate(requestId);
@@ -32,31 +37,31 @@ public class AdminUserController {
     }
 
     @PatchMapping("/{targetEmail}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> updateUserStatus(
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable String targetEmail,
             @RequestParam UserStatus newStatus) {
 
-        // 임시 하드코딩 (게이트웨이 완성 전)
-        String adminEmail = "admin@goldenharvest.com";
-
-        adminUserCommandService.updateUserStatus(targetEmail, newStatus, adminEmail);
+        adminUserCommandService.updateUserStatus(targetEmail, newStatus, jwt.getSubject());
 
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @PatchMapping("/{targetEmail}/role")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> updateUserRole(
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable String targetEmail,
             @RequestParam String newRole) {
 
-        String adminEmail = "admin@goldenharvest.com";
-
-        adminUserCommandService.updateUserRole(targetEmail, newRole, adminEmail);
+        adminUserCommandService.updateUserRole(targetEmail, newRole, jwt.getSubject());
 
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
 	@PostMapping("/publish/all")
+    @PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<ApiResponse<?>> publishUserDetails() {
 		adminUserCommandService.publishAllUserDetailsEvent();
 		return ResponseEntity.ok(ApiResponse.success(null));

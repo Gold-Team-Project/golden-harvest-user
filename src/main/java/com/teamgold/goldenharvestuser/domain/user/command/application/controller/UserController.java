@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,23 +26,20 @@ public class UserController {
     // 마이페이지 비밀번호 변경
     @PatchMapping("/password")
     public ResponseEntity<ApiResponse<String>> changePassword(
+            @AuthenticationPrincipal Jwt jwt,
             @RequestBody @Valid PasswordChangeRequest request) {
 
-        // 임시 사용자 이메일 (게이트웨이 완성 전)
-        String userEmail = "user@goldenharvest.com";
-
-        userService.changePassword(userEmail, request);
+        userService.changePassword(jwt.getSubject(), request);
         return ResponseEntity.ok(ApiResponse.success("비밀번호가 성공적으로 변경되었습니다."));
     }
 
     // 회원 정보 수정
     @PatchMapping("/profile")
     public ResponseEntity<ApiResponse<String>> updateAddress(
+            @AuthenticationPrincipal Jwt jwt,
             @RequestBody UserProfileUpdateRequest userProfileUpdateRequest) {
 
-        String userEmail = "user@goldenharvest.com";
-
-        userService.updateProfile(userEmail, userProfileUpdateRequest);
+        userService.updateProfile(jwt.getSubject(), userProfileUpdateRequest);
 
         return ResponseEntity.ok(ApiResponse.success("회원 정보가 성공적으로 수정되었습니다."));
     }
@@ -48,13 +47,11 @@ public class UserController {
     // 사업자 정보 수정 요청
     @PostMapping(value = "/business-update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> requestBusinessUpdate(
+            @AuthenticationPrincipal Jwt jwt,
             @RequestPart("data") @Valid UserUpdateRequest userUpdateRequest,
             @RequestPart("file") MultipartFile file
     ) throws IOException {
-
-        String userEmail = "user@goldenharvest.com";
-
-        userService.requestBusinessUpdate(userEmail, userUpdateRequest, file);
+        userService.requestBusinessUpdate(jwt.getSubject(), userUpdateRequest, file);
 
         return ResponseEntity.ok(ApiResponse.success("사업자 정보 수정 요청이 성공적으로 접수되었습니다."));
     }
