@@ -1,6 +1,6 @@
 spring:
   application:
-    name: golden-harvest
+    name: golden-harvest-user
   mvc:
     static-path-pattern: /files/** # 브라우저 요청 URL 패턴
   web:

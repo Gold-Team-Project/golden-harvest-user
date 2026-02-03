@@ -59,10 +59,6 @@ dependencies {
     implementation 'commons-io:commons-io:2.20.0'
 
 
-    // spring cloud(MSA)
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-    // 공통 모듈
-    implementation 'com.teamgold:golden-harvest-common-all:0.0.1-SNAPSHOT'
     // 내부 인증 처리
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
