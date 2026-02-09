@@ -2,5 +2,6 @@ package com.teamgold.goldenharvestuser.domain.user.command.domain;
 
 public enum RequestStatus {
     PENDING,   // 관리자 확인 전
-    APPROVED,  // 승인됨
+    APPROVED, // 승인
+    REJECTED // 반려
 }

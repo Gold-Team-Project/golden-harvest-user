@@ -23,7 +23,7 @@ public class AdminUserCommandServiceImpl implements AdminUserCommandService {
 
     private final UserRepository userRepository;
     private final UserUpdateApprovalRepository userUpdateApprovalRepository;
-	private final UserStatusUpdateEventPublisher userUpdateEventPublisher;
+    private final UserStatusUpdateEventPublisher userUpdateEventPublisher;
     private final RoleRepository roleRepository;
 
     @Override
@@ -33,15 +33,16 @@ public class AdminUserCommandServiceImpl implements AdminUserCommandService {
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getStatus() != UserStatus.PENDING) {
-           throw  new BusinessException(ErrorCode.USER_ONLY_PENDING_CAN_BE_APPROVED);
+            throw  new BusinessException(ErrorCode.USER_ONLY_PENDING_CAN_BE_APPROVED);
         }
 
+        // newStatus가 ACTIVE면 승인, REJECTED(또는 INACTIVE)면 반려
         user.updateStatus(newStatus);
     }
 
     @Override
     @Transactional
-    public void approveProfileUpdate(Long approvalId) {
+    public void processProfileUpdate(Long approvalId, RequestStatus status) {
         // 1. "승인 대기 건(엔티티)"을 찾습니다.
         UserUpdateApproval approval = userUpdateApprovalRepository.findById(approvalId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REQUEST));
@@ -50,31 +51,37 @@ public class AdminUserCommandServiceImpl implements AdminUserCommandService {
             throw new BusinessException(ErrorCode.DUPLICATE_REQUEST);
         }
 
-        // 2. 승인 처리 (상태 변경)
-        approval.approve();
+        // 2. 승인/반려 처리
+        if (status == RequestStatus.APPROVED) {
+            // 승인 로직
+            approval.approve(); // 요청 엔티티 상태 변경 (APPROVED)
 
-        // 3. 실제 유저 엔티티 정보 업데이트
-        User user = approval.getUser();
-
-        user.updateBusinessInfo(
-                approval.getRequestCompany(),
-                approval.getRequestBusinessNumber(),
-                approval.getRequestFileUrl()
-        );
+            // 실제 유저 엔티티 정보 업데이트
+            User user = approval.getUser();
+            user.updateBusinessInfo(
+                    approval.getRequestCompany(),
+                    approval.getRequestBusinessNumber(),
+                    approval.getRequestFileUrl()
+            );
+        } else if (status == RequestStatus.REJECTED) {
+            // 반려 로직
+            approval.reject();
+            // 반려 시에는 유저 정보(user.updateBusinessInfo)를 업데이트하지 않습니다.
+        }
     }
 
     @Override
     @Transactional
     public void updateUserStatus(String targetEmail, UserStatus newStatus, String adminEmail) {
         // 본인 계정인지 확인
-    if (targetEmail.equals(adminEmail)) {
-        throw new BusinessException(ErrorCode.INVALID_REQUEST);
-    }
+        if (targetEmail.equals(adminEmail)) {
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
 
-    User user = userRepository.findByEmail(targetEmail)
-            .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByEmail(targetEmail)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-    user.updateStatus(newStatus);
+        user.updateStatus(newStatus);
     }
 
     @Override
@@ -96,6 +103,7 @@ public class AdminUserCommandServiceImpl implements AdminUserCommandService {
             );
         }
     }
+
     @Override
     public void updateUserRole(String targetEmail, String newRole, String adminEmail) {
         // 1. 대상 유저 조회
@@ -107,8 +115,8 @@ public class AdminUserCommandServiceImpl implements AdminUserCommandService {
             throw new BusinessException(ErrorCode.INVALID_REQUEST);
         }
 
-       Role role = roleRepository.findById(newRole)
-               .orElseThrow(() -> new BusinessException(ErrorCode.FORBIDDEN_ACCESS));
+        Role role = roleRepository.findById(newRole)
+                .orElseThrow(() -> new BusinessException(ErrorCode.FORBIDDEN_ACCESS));
 
         user.updateRole(role);
 

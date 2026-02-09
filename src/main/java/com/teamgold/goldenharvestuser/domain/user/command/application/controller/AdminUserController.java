@@ -3,6 +3,7 @@ package com.teamgold.goldenharvestuser.domain.user.command.application.controlle
 import com.teamgold.goldenharvestuser.common.response.ApiResponse;
 import com.teamgold.goldenharvestuser.domain.user.command.application.dto.request.UserApproveRequest;
 import com.teamgold.goldenharvestuser.domain.user.command.application.service.AdminUserCommandService;
+import com.teamgold.goldenharvestuser.domain.user.command.domain.RequestStatus;
 import com.teamgold.goldenharvestuser.domain.user.command.domain.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,9 @@ public class AdminUserController {
 
     private final AdminUserCommandService adminUserCommandService;
 
-    // 신규 가입 승인
+
+     // 신규 가입 승인 및 반려
+
     @PatchMapping("/{email}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> approveUser(
@@ -28,11 +31,16 @@ public class AdminUserController {
         adminUserCommandService.approveUser(email, request.getUserStatus());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
-    // 정보 수정 승인
+
+
+     // 정보 수정 요청 승인 및 반려 (통합 엔드포인트)
     @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/update-requests/{requestId}/approve")
-    public ResponseEntity<ApiResponse<Void>> approveProfileUpdate(@PathVariable Long requestId) {
-        adminUserCommandService.approveProfileUpdate(requestId);
+    @PatchMapping("/update-requests/{requestId}/process")
+    public ResponseEntity<ApiResponse<Void>> processProfileUpdate(
+            @PathVariable Long requestId,
+            @RequestParam RequestStatus status) {
+
+        adminUserCommandService.processProfileUpdate(requestId, status);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -44,7 +52,6 @@ public class AdminUserController {
             @RequestParam UserStatus newStatus) {
 
         adminUserCommandService.updateUserStatus(targetEmail, newStatus, jwt.getSubject());
-
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -56,14 +63,13 @@ public class AdminUserController {
             @RequestParam String newRole) {
 
         adminUserCommandService.updateUserRole(targetEmail, newRole, jwt.getSubject());
-
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-	@PostMapping("/publish/all")
+    @PostMapping("/publish/all")
     @PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<ApiResponse<?>> publishUserDetails() {
-		adminUserCommandService.publishAllUserDetailsEvent();
-		return ResponseEntity.ok(ApiResponse.success(null));
-	}
+    public ResponseEntity<ApiResponse<?>> publishUserDetails() {
+        adminUserCommandService.publishAllUserDetailsEvent();
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

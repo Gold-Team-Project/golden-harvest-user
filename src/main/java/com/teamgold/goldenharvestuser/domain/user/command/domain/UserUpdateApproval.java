@@ -43,4 +43,9 @@ public class UserUpdateApproval {
     public void approve() {
         this.status = RequestStatus.APPROVED;
     }
+
+    // 반려 처리 메서드
+    public void reject() {
+        this.status = RequestStatus.REJECTED;
+    }
 }
